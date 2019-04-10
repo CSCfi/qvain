@@ -45,7 +45,7 @@ COPY --from=go-builder /build/qvain-api/bin ./bin
 COPY --from=go-builder /build/qvain-api/schema ./schema
 COPY --from=go-builder /build/qvain-api/doc ./doc
 COPY --from=js-builder /build/qvain-js/dist ./web
-COPY qvain-bin.spec /tmp
+COPY spec/qvain-bin.spec /tmp
 
 # inject version information for backend
 ARG API_COMMIT_HASH
@@ -61,10 +61,13 @@ ARG JS_COMMIT_TAG
 #ARG JS_VERSION
 #ARG JS_REPO
 
-RUN mkdir /build && \
-	chown 1000:1000 /build && \
-	chmod 755 /root
-USER 1000:1000
+# TODO: dynamic UIDs
+#RUN mkdir /build && \
+#	chown 1000:1000 /build && \
+#	chmod 755 /root
+#USER 1000:1000
+
+RUN mkdir /build
 
 RUN rpmbuild -bb \
 	--define "_topdir /build" \
