@@ -1,0 +1,80 @@
+### build image: Go backend
+FROM golang:1 AS go-builder
+
+# cache deps
+WORKDIR /build/qvain-api
+COPY qvain-api/go.mod .
+COPY qvain-api/go.sum .
+COPY qvain-api/Makefile .
+
+RUN go mod download
+RUN go get -v github.com/wvh/sourcelink
+RUN go get -v github.com/dgraph-io/badger/...
+
+# copy code and git (TODO: prevent cache invalidation due to git?)
+COPY .git /qvain/.git
+COPY qvain-api/ .
+
+# build
+RUN make all
+
+
+### build image: Vue frontend
+FROM node:lts AS js-builder
+
+# cache deps
+WORKDIR /build/qvain-js
+COPY qvain-js/package*.json ./
+RUN npm install
+
+# copy code
+COPY qvain-js/ .
+
+# build
+RUN npm run build
+
+
+### build image: rpmbuild on CentOS
+FROM centos:7
+RUN yum install -y \
+	rpm-build \
+	rpm-sign && yum clean all
+
+WORKDIR /srv/qvain
+COPY --from=go-builder /build/qvain-api/bin ./bin
+COPY --from=go-builder /build/qvain-api/schema ./schema
+COPY --from=go-builder /build/qvain-api/doc ./doc
+COPY --from=js-builder /build/qvain-js/dist ./web
+COPY qvain-bin.spec /tmp
+
+# inject version information for backend
+ARG API_COMMIT_HASH
+ARG API_COMMIT_TAG
+#ARG API_COMMIT_BRANCH
+#ARG API_VERSION
+#ARG API_REPO
+
+# inject version information for frontend
+ARG JS_COMMIT_HASH
+ARG JS_COMMIT_TAG
+#ARG JS_COMMIT_BRANCH
+#ARG JS_VERSION
+#ARG JS_REPO
+
+RUN mkdir /build && \
+	chown 1000:1000 /build && \
+	chmod 755 /root
+USER 1000:1000
+
+RUN rpmbuild -bb \
+	--define "_topdir /build" \
+	--define "apiCommit $API_COMMIT_HASH" \
+	--define "apiVersion $API_COMMIT_TAG" \
+	--define "jsCommit $JS_COMMIT_HASH" \
+	--define "jsVersion $JS_COMMIT_TAG" \
+	/tmp/qvain-bin.spec && \
+	rpm -qip /build/RPMS/*/qvain-*
+
+#	if mountpoint -q /mnt; then \
+#		cp -av /build/RPMS/*/qvain* /mnt/; \
+#	fi
