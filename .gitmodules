@@ -1,0 +1,6 @@
+[submodule "qvain-js"]
+	path = qvain-js
+	url = https://github.com/NatLibFi/qvain-js
+[submodule "qvain-api"]
+	path = qvain-api
+	url = https://github.com/NatLibFi/qvain-api
