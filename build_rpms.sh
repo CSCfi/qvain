@@ -1,4 +1,7 @@
 #!/bin/sh
+#
+# -wvh- Build production RPMs using a three-step multistage Docker image (go + js --> final)
+#
 
 set -ex
 
@@ -54,4 +57,4 @@ docker build -t qvain-rpm -f docker/Dockerfile.rpms \
 
 ### copy rpms out of image
 
-docker run -it -u $(id -u):$(id -g) -v "$(pwd)"/rpms:/mnt qvain-rpm sh -c 'cp -av /build/RPMS/*/qvain-* /mnt/'
+docker run -it -u $(id -u):$(id -g) -v "$(pwd)"/rpms:/mnt --rm qvain-rpm sh -c 'cp -av /build/RPMS/*/qvain-* /mnt/'
