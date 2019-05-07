@@ -12,7 +12,7 @@
 
 %global debug_package    %{nil}
 %global provider         github.com
-%global project          NatLibFi
+%global project          CSCfi
 
 # convert semver with major.minor.patch to major.minor
 %define semMajorMinor()  %(echo "%1" | sed 's/^[^0-9]*\\([0-9]*\\)\\.\\([0-9]*\\).*$/\\1.\\2/')

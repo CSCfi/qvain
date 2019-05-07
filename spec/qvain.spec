@@ -12,7 +12,7 @@
 
 %global debug_package    %{nil}
 %global provider         github.com
-%global project          NatLibFi
+%global project          CSCfi
 
 %define semMajorMinor()  %(echo "%1" | sed 's/^[^0-9]*\\([0-9]*\\)\\.\\([0-9]*\\).*$/\\1.\\2/')
 
@@ -72,7 +72,7 @@ Version:          %{api_version}
 Release:          %{api_release}%{?dist}
 #Provides:         %{api_repo} = %{api_version}-%{release}
 Provides:         %{api_repo} = %{api_version}
-BuildRequires:    golang >= 1.9.0
+BuildRequires:    golang >= 1.11.0
 #Requires:         %{js_repo} = %{version}-%{release}
 Requires:         postgresql >= 9.6, postgresql-server >= 9.6, redis > 3.2
 Requires(post):   systemd
